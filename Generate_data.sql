@@ -1,4 +1,4 @@
-- data_generation/1_init_schema_and_data.sql
+-- data_generation/1_init_schema_and_data.sql
 
 -- This script will:
 -- 1. Create the necessary extensions.

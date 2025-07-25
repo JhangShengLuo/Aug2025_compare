@@ -21,7 +21,6 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./data_generation:/docker-entrypoint-initdb.d # Mount data generation scripts
     deploy:
       resources:
         limits:
@@ -37,7 +36,7 @@ services:
 
   # Hydra (Columnar) Service
   hydra:
-    image: hydradatabase/hydra:latest
+    image: ghcr.io/hydradatabase/hydra:latest
     container_name: hydra_columnar_db
     restart: always
     environment:
@@ -49,6 +48,7 @@ services:
     volumes:
       - hydra_data:/var/lib/postgresql/data
       - ./data_generation:/docker-entrypoint-initdb.d # Also mount scripts here
+      - ./files/postgres/postgresql.conf:/etc/postgresql/postgresql.conf
     deploy:
       resources:
         limits:
@@ -61,6 +61,7 @@ services:
       retries: 5
     networks:
       - db_network
+    command: postgres -c 'config_file=/etc/postgresql/postgresql.conf'
 
   # Jupyter Notebook for Analysis and Visualization
   jupyter:
@@ -81,7 +82,7 @@ services:
     container_name: pgadmin_ui
     restart: always
     environment:
-      PGADMIN_DEFAULT_EMAIL: student@example.com
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
       PGADMIN_DEFAULT_PASSWORD: admin
     ports:
       - "5050:80"
