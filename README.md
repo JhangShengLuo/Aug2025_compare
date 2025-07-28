@@ -1,7 +1,12 @@
 # Aug2025_compare
-Aug2025_compare
+
+## reference
+
+https://github.com/hydradatabase/columnar
 
 
+
+## tutorial
 This is an excellent project for understanding modern database architectures. I will provide a complete, hands-on tutorial to compare row-oriented PostgreSQL with the columnar Hydra database.
 
 Here are the components for your tutorial, designed to be self-contained and reproducible.

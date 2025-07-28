@@ -5,7 +5,14 @@
 -- You will need to fetch a valid UUID from your table first.
 -- Example: \set lookup_uuid '''...your-uuid-here...'''
 
+
+
+
+
 -- Query 1: Point Lookup
+-- fetch a single record for order_id to replace the :lookup_uuid
+SELECT order_id FROM orders_row LIMIT 1;
+SELECT order_id FROM orders_columnar LIMIT 1;
 -- Fetches a single record by its primary key.
 -- Expected: Faster on PostgreSQL (row-store) due to its B-tree index.
 EXPLAIN ANALYZE SELECT * FROM orders_row WHERE order_id = :lookup_uuid;

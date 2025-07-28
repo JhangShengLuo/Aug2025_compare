@@ -1,4 +1,4 @@
-- data_generation/1_init_schema_and_data.sql
+-- data_generation/1_init_schema_and_data.sql
 
 -- This script will:
 -- 1. Create the necessary extensions.
@@ -58,7 +58,7 @@ SELECT
     floor(random() * 10 + 1)::INT,
     (random() * 500 + 10)::DECIMAL(10, 2),
     (ARRAY['North', 'South', 'East', 'West', 'Central'])[floor(random() * 5 + 1)]
-FROM generate_series(1, 1000000);
+FROM generate_series(1, 10000000);
 
 -- Generate and insert 1 million rows of data into the columnar table
 -- This will also run on the Hydra container.
@@ -71,7 +71,7 @@ SELECT
     floor(random() * 10 + 1)::INT,
     (random() * 500 + 10)::DECIMAL(10, 2),
     (ARRAY['North', 'South', 'East', 'West', 'Central'])[floor(random() * 5 + 1)]
-FROM generate_series(1, 1000000);
+FROM generate_series(1, 10000000);
 
 -- Create an index on the row-based table for fair point-lookup comparison
 CREATE INDEX idx_orders_row_order_id ON orders_row(order_id);
