@@ -41,6 +41,10 @@ services:
     image: clickhouse/clickhouse-server:latest
     container_name: clickhouse_columnar_db
     restart: always
+    environment:
+      - CLICKHOUSE_USER=admin
+      - CLICKHOUSE_PASSWORD=password
+      - CLICKHOUSE_DB=clickhouse_db
     ports:
       - "8123:8123" # HTTP interface
       - "9000:9000" # Native client interface
@@ -64,6 +68,7 @@ services:
       - ./notebooks:/home/jovyan/work
     environment:
       - JUPYTER_ENABLE_LAB=yes
+      - JUPYTER_TOKEN=datateam
     networks:
       - db_network
 
@@ -84,13 +89,22 @@ services:
     depends_on:
       - postgres
 
-  # Tabix Web UI for ClickHouse
-  tabix:
-    image: spoonest/tabix:latest
-    container_name: tabix_ui
+  # ch-ui Web UI for ClickHouse
+  ch-ui:
+    image: 'ghcr.io/caioricciuti/ch-ui:latest'
+    platform: linux/amd64
+    container_name: ch_ui
     restart: always
     ports:
-      - "8080:80"
+      - "5521:5521"
+    environment:
+      VITE_CLICKHOUSE_URL: "http://localhost:8123"
+      # VITE_CLICKHOUSE_USER: "admin"
+      # VITE_CLICKHOUSE_PASS: "password"
+      # Advanced Options
+      # VITE_CLICKHOUSE_USE_ADVANCED: "true"  # Enable advanced features
+      # VITE_CLICKHOUSE_CUSTOM_PATH: "/custom/path"  # Optional: Custom HTTP path
+      # VITE_CLICKHOUSE_REQUEST_TIMEOUT: "30000"  # Optional: Request timeout in milliseconds
     networks:
       - db_network
     depends_on:
