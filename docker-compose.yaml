@@ -1,9 +1,9 @@
 # docker-compose.yml
 # This file sets up four services:
 # 1. postgres: A standard row-oriented PostgreSQL database.
-# 2. hydra: A columnar database, which is a fork of Postgres.
+# 2. clickhouse: A columnar database for high-performance analytics.
 # 3. jupyter: A Jupyter notebook for data analysis and visualization.
-# 4. pgadmin: A web-based UI for managing PostgreSQL and Hydra databases.
+# 4. clickhouse-client: A client to interact with the ClickHouse server.
 
 version: '3.8'
 
@@ -21,6 +21,7 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./data_generation:/docker-entrypoint-initdb.d
     deploy:
       resources:
         limits:
@@ -34,34 +35,32 @@ services:
     networks:
       - db_network
 
-  # Hydra (Columnar) Service
-  hydra:
-    image: ghcr.io/hydradatabase/hydra:latest
-    container_name: hydra_columnar_db
+  # ClickHouse (Columnar) Service
+  clickhouse:
+    image: clickhouse/clickhouse-server:latest
+    container_name: clickhouse_columnar_db
     restart: always
-    environment:
-      - POSTGRES_USER=admin
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=hydra_db
     ports:
-      - "5433:5432" # Map to a different host port to avoid conflict
+      - "8123:8123" # HTTP interface
+      - "9000:9000" # Native client interface
     volumes:
-      - hydra_data:/var/lib/postgresql/data
-      - ./data_generation:/docker-entrypoint-initdb.d # Also mount scripts here
-      - ./files/postgres/postgresql.conf:/etc/postgresql/postgresql.conf
-    deploy:
-      resources:
-        limits:
-          cpus: '2.0'
-          memory: 4G
+      - clickhouse_data:/var/lib/clickhouse
+    networks:
+      - db_network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U admin -d hydra_db"]
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8123/ping"]
       interval: 10s
       timeout: 5s
       retries: 5
+
+  # ClickHouse Client
+  clickhouse-client:
+    image: clickhouse/clickhouse-client:latest
+    container_name: clickhouse_client
     networks:
       - db_network
-    command: postgres -c 'config_file=/etc/postgresql/postgresql.conf'
+    depends_on:
+      - clickhouse
 
   # Jupyter Notebook for Analysis and Visualization
   jupyter:
@@ -76,31 +75,10 @@ services:
     networks:
       - db_network
 
-  # pgAdmin Web UI Service
-  pgadmin:
-    image: dpage/pgadmin4:latest
-    container_name: pgadmin_ui
-    restart: always
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@example.com
-      PGADMIN_DEFAULT_PASSWORD: admin
-    ports:
-      - "5050:80"
-    volumes:
-      - pgadmin_data:/var/lib/pgadmin
-    networks:
-      - db_network
-    depends_on:
-      postgres:
-        condition: service_healthy
-      hydra:
-        condition: service_healthy
-
 networks:
   db_network:
     driver: bridge
 
 volumes:
   postgres_data:
-  hydra_data:
-  pgadmin_data:
+  clickhouse_data:

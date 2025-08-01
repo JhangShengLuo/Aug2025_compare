@@ -1,26 +1,12 @@
 # Hands-On Tutorial: Row vs. Columnar Database Performance
-**Objective:** To understand the fundamental performance differences between a traditional row-oriented database (PostgreSQL) and a columnar database (Hydra) through hands-on benchmarking.
+**Objective:** To understand the fundamental performance differences between a traditional row-oriented database (PostgreSQL) and a columnar database (ClickHouse) through hands-on benchmarking.
 
 ## Section 1: Environment Setup
-In this section, we will launch our databases using Docker and load them with 1 million rows of synthetic data.
+In this section, we will launch our databases using Docker and load them with 10 million rows of synthetic data.
 
 ### 1.1. Start the Environment:
 
 * Ensure you have Docker and Docker Compose installed.
-
-* Create a directory for this project.
-
-* Inside, create the following structure:
-
-```
-/your-project-folder
-|-- docker-compose.yml
-|-- /data_generation
-|   |-- 1_init_schema_and_data.sql
-|-- /notebooks
-```
-
-* Place the provided docker-compose.yml and the SQL script in their respective locations.
 
 * Open your terminal in the project root and run:
 
@@ -28,11 +14,11 @@ In this section, we will launch our databases using Docker and load them with 1 
 docker-compose up -d
 ```
 
-* This command will download the images and start the PostgreSQL, Hydra, and Jupyter containers. The initial data generation may take a few minutes.
+* This command will download the images and start the PostgreSQL, ClickHouse, and Jupyter containers. The initial data generation may take a few minutes.
 
 ### 1.2. Connect to the Databases:
 
-* You can use any SQL client (like pgAdmin, DBeaver, psql, or a VS Code extension) to connect.
+* You can use any SQL client (like DBeaver, a VS Code extension, or the command-line clients) to connect.
 
 * PostgreSQL (Row-Store):
 
@@ -46,55 +32,54 @@ docker-compose up -d
 
   * Password: `password`
 
-* Hydra (Columnar-Store):
+* ClickHouse (Columnar-Store):
 
-  * Host: `localhost`
+  * You can use the command-line client to connect:
 
-  * Port: `5433`
-
-  * Database: `hydra_db`
-
-  * User: `admin`
-
-  * Password: `password`
+  ```
+  docker-compose exec clickhouse-client clickhouse-client --host clickhouse
+  ```
 
 ### 1.3. Verify Data Loading:
 
 * Connect to each database and run a simple count to ensure the data is loaded:
 
-```
-SELECT COUNT(*) FROM orders_row; -- Should return 1,000,000
-SELECT COUNT(*) FROM orders_columnar; -- Should return 1,000,000
+```sql
+-- For PostgreSQL
+SELECT COUNT(*) FROM orders_row;
+
+-- For ClickHouse
+SELECT COUNT(*) FROM orders_columnar;
 ```
 
 ## Section 2: Query Benchmarks
-Now, let's run the benchmark queries. Use `EXPLAIN ANALYZE` before each query to see the execution plan and, most importantly, the `Execution Time`.
+Now, let's run the benchmark queries. For PostgreSQL, you can use `EXPLAIN ANALYZE` to see the execution plan and time. For ClickHouse, the query execution time is printed by default.
 
 ### 2.1. Instructions:
 
-1. Open two query editor tabs in your SQL client, one for PostgreSQL and one for Hydra.
+1. Open two query editor tabs in your SQL client, one for PostgreSQL and one for ClickHouse.
 
 2. First, get a sample order_id for the point-lookup query. Run this on the PostgreSQL DB:
 
-```
+```sql
 SELECT order_id FROM orders_row LIMIT 1;
 ```
 
-3. Copy the UUID and replace :lookup_uuid in the benchmark script with it.
+3. Copy the UUID and replace `'your-uuid-here'` in the ClickHouse benchmark script with it.
 
 4. Run each of the 5 benchmark queries on both databases.
 
-5. Record the Execution Time from the output of `EXPLAIN ANALYZE` for each query in the table below.
+5. Record the Execution Time for each query in the table below.
 
 ### 2.2. Results Table:
 
-| Query Type | PostgreSQL Time (ms) | Hydra Time (ms) | Winner |
+| Query Type | PostgreSQL Time (ms) | ClickHouse Time (ms) | Winner |
 |------------|----------------------|-----------------|--------|
-| Point Lookup | 0.5 | 1.2 | PostgreSQL |
-| Aggregation | 2100 | 900 | Hydra |
-| Filtering | 1800 | 700 | Hydra |
-| Analytical | 3200 | 1100 | Hydra |
-| Full Scan Aggregation | 4500 | 2000 | Hydra |
+| Point Lookup | | | |
+| Aggregation | | | |
+| Filtering | | | |
+| Analytical | | | |
+| Full Scan Aggregation | | | |
 
 ## Section 3: Performance Analysis
 This is where we analyze why we see these performance differences.
@@ -103,11 +88,11 @@ This is where we analyze why we see these performance differences.
 
 * PostgreSQL uses a B-tree index on the `order_id`. It can very quickly locate the exact disk block containing the entire row and return it.
 
-* Hydra, being columnar, has to "stitch together" the requested columns from different files, which adds overhead for single-row lookups.
+* ClickHouse, being columnar, has to "stitch together" the requested columns from different files, which adds overhead for single-row lookups.
 
 ### 3.2. Aggregation & Analytical Queries: Why did the columnar-store win?
 
-* Hydra only reads the data for the columns mentioned in the query (`region`, `price`, `quantity`, `customer_id`). It completely ignores the other columns, leading to a massive reduction in I/O.
+* ClickHouse only reads the data for the columns mentioned in the query (`region`, `price`, `quantity`, `customer_id`). It completely ignores the other columns, leading to a massive reduction in I/O.
 
 * PostgreSQL, a row-store, must load the entire row into memory for every record it processes, even if it only needs a few columns. This is highly inefficient for analytical workloads.
 
@@ -117,7 +102,7 @@ This is where we analyze why we see these performance differences.
 
 ### 4.1. Feature
 
-| Feature | Row-Oriented (PostgreSQL) | Columnar (Hydra) |
+| Feature | Row-Oriented (PostgreSQL) | Columnar (ClickHouse) |
 |---------|--------------------------|------------------|
 | Best For | OLTP (Online Transaction Processing), Web Apps, ERP Systems | OLAP (Online Analytical Processing), Data Warehouses, BI |
 | Primary Operation | `INSERT`, `UPDATE`, `DELETE`, Point `SELECTs` | Bulk `SELECTs`, Aggregations (`SUM`, `AVG`, `COUNT`) |
@@ -151,8 +136,8 @@ import pandas as pd
 # Replace these placeholder values with your actual measured times in milliseconds!
 data = {
     "Query": ["Point Lookup", "Aggregation", "Filtering", "Analytical", "Full Scan"],
-    "PostgreSQL (ms)": [0.5, 2100, 1800, 3200, 4500],  # Example values
-    "Hydra (ms)": [1.2, 900, 700, 1100, 2000]        # Example values
+    "PostgreSQL (ms)": [],  # Example values
+    "ClickHouse (ms)": []        # Example values
 }
 
 df = pd.DataFrame(data)
@@ -163,7 +148,7 @@ width = 0.35
 x = range(len(df["Query"]))
 
 rects1 = ax.bar([i - width/2 for i in x], df["PostgreSQL (ms)"], width, label="PostgreSQL (Row)", color='skyblue')
-rects2 = ax.bar([i + width/2 for i in x], df["Hydra (ms)"], width, label="Hydra (Columnar)", color='lightcoral')
+rects2 = ax.bar([i + width/2 for i in x], df["ClickHouse (ms)"], width, label="ClickHouse (Columnar)", color='lightcoral')
 
 # Add some text for labels, title and axes ticks
 ax.set_ylabel('Execution Time (ms) - Lower is Better')
@@ -178,4 +163,11 @@ ax.bar_label(rects2, padding=3)
 fig.tight_layout()
 plt.yscale('log') # Use a logarithmic scale for better visualization if times vary widely
 plt.show()
+```
+
+## Conclusion
+Congratulations! You've now seen firsthand the fundamental trade-offs between row and columnar databases. This understanding is crucial for choosing the right tool for the job in modern data architectures. You can now safely shut down the environment:
+
+```
+docker-compose down
 ```

@@ -1,37 +1,28 @@
-# Aug2025_compare
 
-## reference
+# Row vs. Columnar Database Comparison
 
-https://github.com/hydradatabase/columnar
+This project provides a hands-on tutorial comparing the performance of a traditional row-oriented database (PostgreSQL) with a columnar database (Hydra).
 
+## Introduction
 
+This project is designed to provide a clear, practical understanding of the architectural differences between row-oriented and columnar databases. By running a series of benchmark queries against both PostgreSQL and Hydra, you will be able to see firsthand how each database performs under different workloads.
 
-## tutorial
-This is an excellent project for understanding modern database architectures. I will provide a complete, hands-on tutorial to compare row-oriented PostgreSQL with the columnar Hydra database.
+## Components
 
-Here are the components for your tutorial, designed to be self-contained and reproducible.
+This project includes the following components:
 
-## 1. Docker Compose Setup
-This docker-compose.yml file sets up the PostgreSQL and Hydra containers with the specified resource limits. It also includes a Jupyter Notebook service for visualizing the benchmark results later.
+*   **Docker Compose Setup:** A `docker-compose.yaml` file to easily set up the entire environment, including PostgreSQL, Hydra, Jupyter Notebook, and pgAdmin.
+*   **Data Generation:** A SQL script (`Generate_data.sql`) that creates and populates two tables (`orders_row` and `orders_columnar`) with 10 million rows of synthetic data.
+*   **Benchmark Queries:** A set of SQL queries (`Benchmark_Queries.sql`) designed to test various database operations, such as point lookups, aggregations, and filtering.
+*   **Tutorial:** A detailed guide (`Tutorial.md`) that walks you through the entire process, from setting up the environment to running the benchmarks and analyzing the results.
+*   **Jupyter Notebook:** A notebook is provided to help you visualize the benchmark results.
 
-## 2. Data Generation and Loading Scripts
-Create a directory named data_generation and place the following SQL script inside it. This script will be automatically executed by both PostgreSQL and Hydra when the containers start.
-SQL Data Generation Script
-Jul 25, 10:17 AM
+## Getting Started
 
+To get started with this project, please refer to the `Tutorial.md` file for detailed instructions on how to set up the environment, run the benchmarks, and analyze the results.
 
-## 3. Benchmark Queries
-Here are the five queries you'll use to benchmark the two databases. You can run these using a SQL client connected to each database.
-Benchmark SQL Queries
-Jul 25, 10:17 AM
+## Reference
 
-Open
+This project is based on the following reference:
 
-## 4. Tutorial and Report Template
-This Markdown file serves as the main tutorial document for your students. It guides them through the entire process from setup to analysis.
-Tutorial: PostgreSQL (Row) vs. Hydra (Columnar)
-Jul 25, 10:17 AM
-
-Open
-
-I have provided all the necessary components for your tutorial. You can now assemble the files and directories as described, run docker-compose up, and walk through the benchmark and analysis steps. This hands-on approach should give a very clear and memorable lesson on the core differences between these two powerful database architectures.
+*   [Hydra Database Columnar](https://github.com/hydradatabase/columnar)
