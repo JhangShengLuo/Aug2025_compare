@@ -39,8 +39,7 @@ EXPLAIN ANALYZE SELECT AVG(price) FROM orders_row;
 -- ##################
 -- ## ClickHouse
 -- ##################
--- For ClickHouse, we run the query and observe the 'Elapsed' time in the results.
--- To see the execution plan without running the query, you can use 'EXPLAIN ...'
+-- For ClickHouse, we run the query and observe the 'Query took Xms' time in the ch-ui results.
 
 -- Query 1: Point Lookup
 -- Fetches a single record by its primary key.

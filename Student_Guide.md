@@ -8,7 +8,7 @@ Now, let's run the benchmark queries.
 ### 1.1. Instructions:
 
 1. In pgAdmin, open a query tool for the `postgres_db`.
-2. In Grafana, navigate to the "Explore" section and select the ClickHouse data source.
+2. In ch-ui, open a query editor.
 3. First, get a sample `order_id` for the point-lookup query. Run this on the PostgreSQL DB:
 
 ```sql
@@ -23,7 +23,7 @@ SELECT order_id FROM orders_row LIMIT 1;
 
 *   **PostgreSQL (pgAdmin):** Use the `EXPLAIN ANALYZE` command. In the output, look for the `Execution Time` in the "Query Plan" section. This will be in milliseconds (ms).
 
-*   **ClickHouse (Grafana):** Simply run the query. The execution time is displayed in the top right corner of the query editor. It will say `Query took Xms`.
+*   **ClickHouse (ch-ui):** Simply run the query. The execution time is displayed in the bottom right corner of the query editor. It will say `Query took Xms`.
 
 ### 1.3. Results Table:
 
