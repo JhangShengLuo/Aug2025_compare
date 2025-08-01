@@ -1,9 +1,10 @@
 # docker-compose.yml
-# This file sets up four services:
+# This file sets up five services:
 # 1. postgres: A standard row-oriented PostgreSQL database.
 # 2. clickhouse: A columnar database for high-performance analytics.
 # 3. jupyter: A Jupyter notebook for data analysis and visualization.
-# 4. clickhouse-client: A client to interact with the ClickHouse server.
+# 4. pgadmin: A web-based UI for managing PostgreSQL databases.
+# 5. tabix: A web-based UI for managing ClickHouse databases.
 
 version: '3.8'
 
@@ -53,15 +54,6 @@ services:
       timeout: 5s
       retries: 5
 
-  # ClickHouse Client
-  clickhouse-client:
-    image: clickhouse/clickhouse-client:latest
-    container_name: clickhouse_client
-    networks:
-      - db_network
-    depends_on:
-      - clickhouse
-
   # Jupyter Notebook for Analysis and Visualization
   jupyter:
     image: jupyter/scipy-notebook:latest
@@ -75,6 +67,35 @@ services:
     networks:
       - db_network
 
+  # pgAdmin Web UI Service
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: pgadmin_ui
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - db_network
+    depends_on:
+      - postgres
+
+  # Tabix Web UI for ClickHouse
+  tabix:
+    image: spoonest/tabix:latest
+    container_name: tabix_ui
+    restart: always
+    ports:
+      - "8080:80"
+    networks:
+      - db_network
+    depends_on:
+      - clickhouse
+
 networks:
   db_network:
     driver: bridge
@@ -82,3 +103,4 @@ networks:
 volumes:
   postgres_data:
   clickhouse_data:
+  pgadmin_data:

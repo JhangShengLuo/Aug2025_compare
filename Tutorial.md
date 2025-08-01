@@ -2,7 +2,7 @@
 **Objective:** To understand the fundamental performance differences between a traditional row-oriented database (PostgreSQL) and a columnar database (ClickHouse) through hands-on benchmarking.
 
 ## Section 1: Environment Setup
-In this section, we will launch our databases using Docker and load them with 10 million rows of synthetic data.
+In this section, we will launch our databases using Docker and load them with 1 million rows of synthetic data.
 
 ### 1.1. Start the Environment:
 
@@ -14,62 +14,68 @@ In this section, we will launch our databases using Docker and load them with 10
 docker-compose up -d
 ```
 
-* This command will download the images and start the PostgreSQL, ClickHouse, and Jupyter containers. The initial data generation may take a few minutes.
+* This command will download the images and start the PostgreSQL, ClickHouse, pgAdmin, Tabix, and Jupyter containers. The initial data generation may take a few minutes.
 
 ### 1.2. Connect to the Databases:
 
-* You can use any SQL client (like DBeaver, a VS Code extension, or the command-line clients) to connect.
+* We will use web-based UIs to interact with our databases.
 
-* PostgreSQL (Row-Store):
+* **PostgreSQL (Row-Store):**
 
-  * Host: `localhost`
+  * Open your web browser to `http://localhost:5050` to access pgAdmin.
+  * Login with the email `admin@example.com` and the password `admin`.
+  * Click on "Add New Server".
+  * In the "General" tab, give the server a name (e.g., `PostgreSQL-Row`).
+  * In the "Connection" tab, enter the following:
+    * Host name/address: `postgres`
+    * Port: `5432`
+    * Maintenance database: `postgres_db`
+    * Username: `admin`
+    * Password: `password`
+  * Click "Save". You can now browse the `postgres_db` database.
 
-  * Port: `5432`
+* **ClickHouse (Columnar-Store):**
 
-  * Database: `postgres_db`
-
-  * User: `admin`
-
-  * Password: `password`
-
-* ClickHouse (Columnar-Store):
-
-  * You can use the command-line client to connect:
-
-  ```
-  docker-compose exec clickhouse-client clickhouse-client --host clickhouse
-  ```
+  * Open your web browser to `http://localhost:8080` to access Tabix.
+  * Click on "Add server".
+  * Enter the following:
+    * Server name: `ClickHouse-Columnar`
+    * Host: `clickhouse`
+    * Port: `8123`
+  * Click "Save". You can now query the `default` database.
 
 ### 1.3. Verify Data Loading:
 
-* Connect to each database and run a simple count to ensure the data is loaded:
+* In pgAdmin, open a query tool for the `postgres_db` and run:
 
 ```sql
--- For PostgreSQL
 SELECT COUNT(*) FROM orders_row;
+```
 
--- For ClickHouse
+* In Tabix, run the following query:
+
+```sql
 SELECT COUNT(*) FROM orders_columnar;
 ```
 
+* Both queries should return `1,000,000`.
+
 ## Section 2: Query Benchmarks
-Now, let's run the benchmark queries. For PostgreSQL, you can use `EXPLAIN ANALYZE` to see the execution plan and time. For ClickHouse, the query execution time is printed by default.
+Now, let's run the benchmark queries.
 
 ### 2.1. Instructions:
 
-1. Open two query editor tabs in your SQL client, one for PostgreSQL and one for ClickHouse.
-
-2. First, get a sample order_id for the point-lookup query. Run this on the PostgreSQL DB:
+1. In pgAdmin, open a query tool for the `postgres_db`.
+2. In Tabix, open a query editor.
+3. First, get a sample `order_id` for the point-lookup query. Run this on the PostgreSQL DB:
 
 ```sql
 SELECT order_id FROM orders_row LIMIT 1;
 ```
 
-3. Copy the UUID and replace `'your-uuid-here'` in the ClickHouse benchmark script with it.
-
-4. Run each of the 5 benchmark queries on both databases.
-
-5. Record the Execution Time for each query in the table below.
+4. Copy the UUID and replace `'your-uuid-here'` in the benchmark script with it.
+5. Run each of the 5 benchmark queries on both databases.
+6. Record the Execution Time for each query in the table below.
 
 ### 2.2. Results Table:
 
