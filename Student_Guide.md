@@ -8,7 +8,7 @@ Now, let's run the benchmark queries.
 ### 1.1. Instructions:
 
 1. In pgAdmin, open a query tool for the `postgres_db`.
-2. In Tabix, open a query editor.
+2. In Grafana, navigate to the "Explore" section and select the ClickHouse data source.
 3. First, get a sample `order_id` for the point-lookup query. Run this on the PostgreSQL DB:
 
 ```sql
@@ -23,7 +23,7 @@ SELECT order_id FROM orders_row LIMIT 1;
 
 *   **PostgreSQL (pgAdmin):** Use the `EXPLAIN ANALYZE` command. In the output, look for the `Execution Time` in the "Query Plan" section. This will be in milliseconds (ms).
 
-*   **ClickHouse (Tabix):** Simply run the query. The execution time is displayed directly above the results table in the Tabix UI. It will say `Query took X.XXX seconds`. Convert this value to milliseconds (ms) for the results table (e.g., 0.123 seconds = 123 ms).
+*   **ClickHouse (Grafana):** Simply run the query. The execution time is displayed in the top right corner of the query editor. It will say `Query took Xms`.
 
 ### 1.3. Results Table:
 
@@ -107,7 +107,6 @@ rects2 = ax.bar([i + width/2 for i in x], df["ClickHouse (ms)"], width, label="C
 # Add some text for labels, title and axes ticks
 ax.set_ylabel('Execution Time (ms) - Lower is Better')
 ax.set_title('Performance Comparison: Row vs. Columnar Database')
-ax.set_xticks(x)
 ax.set_xticklabels(df["Query"])
 ax.legend()
 

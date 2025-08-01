@@ -41,6 +41,10 @@ services:
     image: clickhouse/clickhouse-server:latest
     container_name: clickhouse_columnar_db
     restart: always
+    environment:
+      - CLICKHOUSE_USER=admin
+      - CLICKHOUSE_PASSWORD=password
+      - CLICKHOUSE_DB=clickhouse_db
     ports:
       - "8123:8123" # HTTP interface
       - "9000:9000" # Native client interface
@@ -64,6 +68,7 @@ services:
       - ./notebooks:/home/jovyan/work
     environment:
       - JUPYTER_ENABLE_LAB=yes
+      - JUPYTER_TOKEN=datateam
     networks:
       - db_network
 
@@ -84,13 +89,14 @@ services:
     depends_on:
       - postgres
 
-  # Tabix Web UI for ClickHouse
-  tabix:
-    image: spoonest/tabix:latest
-    container_name: tabix_ui
+  # Grafana Web UI for ClickHouse
+  grafana:
+    image: grafana/grafana:latest
+    platform: linux/amd64
+    container_name: grafana_ui
     restart: always
     ports:
-      - "8080:80"
+      - "3000:3000"
     networks:
       - db_network
     depends_on:
