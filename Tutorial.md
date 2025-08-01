@@ -77,7 +77,13 @@ SELECT order_id FROM orders_row LIMIT 1;
 5. Run each of the 5 benchmark queries on both databases.
 6. Record the Execution Time for each query in the table below.
 
-### 2.2. Results Table:
+### 2.2. How to Measure Query Time
+
+*   **PostgreSQL (pgAdmin):** Use the `EXPLAIN ANALYZE` command. In the output, look for the `Execution Time` in the "Query Plan" section. This will be in milliseconds (ms).
+
+*   **ClickHouse (Tabix):** Simply run the query. The execution time is displayed directly above the results table in the Tabix UI. It will say `Query took X.XXX seconds`. Convert this value to milliseconds (ms) for the results table (e.g., 0.123 seconds = 123 ms).
+
+### 2.3. Results Table:
 
 | Query Type | PostgreSQL Time (ms) | ClickHouse Time (ms) | Winner |
 |------------|----------------------|-----------------|--------|
