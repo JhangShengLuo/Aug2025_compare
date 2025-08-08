@@ -12,7 +12,11 @@ In this section, you will launch the databases using Docker and load them with 1
 * Open your terminal in the project root and run:
 
 ```
+# start the environment
 docker-compose up -d
+
+# stop the environment
+docker-compose down 
 ```
 
 * This command will download the images and start the PostgreSQL, ClickHouse, pgAdmin, Tabix, and Jupyter containers. The initial data generation may take a few minutes.
